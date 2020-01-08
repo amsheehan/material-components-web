@@ -36,12 +36,12 @@ const {cssClasses} = MDCTextFieldFoundation;
 const getFixture = () => {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `
-    <div class="mdc-text-field mdc-text-field--with-leading-icon">
+    <label class="mdc-text-field mdc-text-field--with-leading-icon">
       <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">event</i>
-      <input type="text" class="mdc-text-field__input" id="my-text-field">
-      <label class="mdc-floating-label" for="my-text-field">My Label</label>
+      <input type="text" class="mdc-text-field__input" aria-labelledby="my-label">
+      <span class="mdc-floating-label" id="my-label">My Label</span>
       <div class="mdc-line-ripple"></div>
-    </div>
+    </label>
   `;
   const el = wrapper.firstElementChild as HTMLElement;
   wrapper.removeChild(el);
@@ -673,6 +673,24 @@ describe('MDCTextField', () => {
            .adapter_.setLineRippleTransformOrigin(100);
        expect(lineRipple.setRippleCenter).toHaveBeenCalledWith(100);
      });
+
+  it('should not focus input when clicking icon', () => {
+    const root = getFixture();
+    const icon = root.querySelector('.mdc-text-field__icon');
+    const component = new MDCTextField(root);
+    document.body.appendChild(root);
+    component.root_.click();
+    assert.equal(
+        component.input_, document.activeElement, 'input_ should be focused');
+    component.input_.blur();
+    assert.notEqual(
+        component.input_, document.activeElement, 'ensure input_ was blurred');
+    icon.click();
+    assert.notEqual(
+        component.input_, document.activeElement,
+        'input_ should not be focused');
+    document.body.removeChild(root);
+  });
 
   function setupMockFoundationTest(root = getFixture()) {
     const mockFoundation = createMockFoundation(MDCTextFieldFoundation);
